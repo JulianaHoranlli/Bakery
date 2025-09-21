@@ -1,103 +1,208 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { toast } from "react-hot-toast";
+import Navbar from "./components/Navbar";
+import DatePicker from "react-datepicker";
+import { FiEdit3 } from "react-icons/fi";
+import "react-datepicker/dist/react-datepicker.css";
+
+type Item = {
+  product: string;
+  quantity: number;
+  price: number;
+};
+
+export default function AddOrder() {
+  const [customer, setCustomer] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [pickup, setPickup] = useState(false);
+  const [pickupTime, setPickupTime] = useState<Date | null>(null);
+  const [sideNote, setSideNote] = useState(""); 
+  const [items, setItems] = useState<Item[]>([{ product: "", quantity: 1, price: 0 }]);
+
+  const addItem = () => setItems([...items, { product: "", quantity: 1, price: 0 }]);
+  const removeItem = (index: number) => setItems(items.filter((_, i) => i !== index));
+
+  const updateItem = (index: number, field: keyof Item, value: string | number) => {
+    setItems(prev => {
+      const newItems = [...prev];
+      if (field === "quantity" || field === "price") {
+        newItems[index] = { ...newItems[index], [field]: Number(value) };
+      } else {
+        newItems[index] = { ...newItems[index], [field]: value as string };
+      }
+      return newItems;
+    });
+  };
+
+  const submitOrder = async () => {
+    const res = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        customer, 
+        phone, 
+        address, 
+        pickup, 
+        pickupTime: pickupTime?.toISOString() || null,
+        sideNote, 
+        items 
+      }),
+    });
+
+    if (res.ok) {
+      toast.success("Order added successfully!");
+      setCustomer(""); setPhone(""); setAddress(""); setPickup(false);
+      setSideNote(""); setItems([{ product: "", quantity: 1, price: 0 }]);
+      setPickupTime(null);
+    } else {
+      const err = await res.json();
+      toast.error(`Failed to add order: ${err?.error || res.statusText}`);
+    }
+  };
+
+  const addOrder = async () => {
+    if (!customer || !phone || items.some(i => !i.product || i.quantity <= 0 || i.price <= 0)) {
+      toast.error("Please fill in all required fields and valid product info!");
+      return;
+    }
+
+    const regex = /^06\d{8}$/;
+    if (!regex.test(phone)) {
+      toast.error("Phone should start with 06 and have 10 digits.");
+      return;
+    }
+
+    await submitOrder();
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="flex items-center justify-center min-h-screen bg-pink-100 p-4 pt-20">
+      <div className="w-full max-w-2xl bg-pink-300 p-8 rounded-xl shadow-xl sm:p-10">
+        <Navbar />
+        <h1 className="text-4xl font-bold mb-6 text-center text-white">🍰 Add Order</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+        <div className="flex flex-col gap-8 mb-6">
+          <input 
+            value={customer} 
+            onChange={e => setCustomer(e.target.value)} 
+            placeholder="Customer" 
+            className="border-2 border-white bg-pink-200/40 p-3 rounded-lg text-white placeholder-white/70 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition" 
+          />
+          <input 
+            value={phone} 
+            onChange={e => setPhone(e.target.value)} 
+            placeholder="Phone" 
+            className="border-2 border-white bg-pink-200/40 p-3 rounded-lg text-white placeholder-white/70 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition" 
+          />
+          <input 
+            value={address} 
+            onChange={e => setAddress(e.target.value)} 
+            placeholder="Address (optional)" 
+            className="border-2 border-white bg-pink-200/40 p-3 rounded-lg text-white placeholder-white/70 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition" 
+          />
+
+          <label className="flex items-center gap-2 text-lg text-white">
+            <input type="checkbox" checked={pickup} onChange={e => setPickup(e.target.checked)} />
+            <b>Pickup</b>
+          </label>
+
+          <div>
+            <label className="block mb-1 text-white">Pickup Time:</label>
+            <DatePicker
+              selected={pickupTime}
+              onChange={(date) => setPickupTime(date)}
+              showTimeSelect
+              dateFormat="yyyy-MM-dd HH:mm"
+              className="border-2 border-white bg-pink-200/40 p-2 rounded w-full text-white placeholder-white/70 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition"
+              placeholderText="Select pickup time"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 mb-1 text-white">
+              <FiEdit3 className="text-pink-50" />
+              Side Note:
+            </label>
+            <textarea
+              value={sideNote}
+              onChange={e => setSideNote(e.target.value)}
+              placeholder="Write a note (optional)"
+              className="border-2 border-white bg-pink-200/40 p-3 rounded-lg w-full text-white placeholder-white/70 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition"
+              rows={3}
+            />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-white">Products</h2>
+
+          <div className="space-y-3">
+            {items.map((item, index) => (
+              <div key={index} className="relative border border-white rounded-lg p-4 text-lg bg-pink-200/30">
+                {/* Remove button */}
+                {index > 0 && (
+                  <button
+                    onClick={() => removeItem(index)}
+                    className="absolute top-0 right-0 bg-red-500 text-white px-3 py-1.5 rounded-lg text-base shadow-md hover:bg-red-600"
+                    title="Remove product"
+                  >
+                    ×
+                  </button>
+                )}
+
+                <div className="flex items-start gap-4">
+                  {/* Product */}
+                  <div className="flex-1 flex flex-col">
+                    <label className="mb-1 text-sm text-white/90">Product</label>
+                    <input
+                      value={item.product}
+                      onChange={e => updateItem(index, "product", e.target.value)}
+                      placeholder="Product"
+                      className="border-2 border-white bg-transparent rounded-lg p-3 text-lg text-white placeholder-white/70 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition"
+                    />
+                  </div>
+
+                  {/* Quantity */}
+                  <div className="flex flex-col w-28">
+                    <label className="mb-1 text-sm text-white/90 text-center">Quantity</label>
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={e => updateItem(index, "quantity", e.target.value)}
+                      placeholder="Qty"
+                      className="border-2 border-white bg-transparent rounded-lg p-3 text-lg text-center text-white placeholder-white/70 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition"
+                    />
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex flex-col w-32">
+                    <label className="mb-1 text-sm text-white/90 text-center">Price</label>
+                    <input
+                      type="number"
+                      value={item.price}
+                      onChange={e => updateItem(index, "price", e.target.value)}
+                      placeholder="Price"
+                      className="border-2 border-white bg-transparent rounded-lg p-3 text-lg text-center text-white placeholder-white/70 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={addItem}
+            className="bg-white text-pink-500 px-4 py-2 rounded-lg mt-3 w-full text-lg font-medium hover:bg-pink-50 transition"
+          >
+            + Add Product
+          </button>
+        </div>
+
+        <button onClick={addOrder} className="bg-pink-400 text-white px-6 py-3 rounded-lg font-semibold w-full hover:bg-pink-50 transition">Add Order</button>
+      </div>
+    </main>
   );
 }
