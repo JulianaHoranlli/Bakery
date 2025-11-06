@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍰 Bakery Order Management System
 
-## Getting Started
+**Bakery Order Management** is a modern web application designed to help bakeries or pastry shops manage customer orders efficiently.  
+It allows users to create, edit, and track orders with product details, pickup times, and custom notes — all through a clean, responsive, and user-friendly interface.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🧁 Add Order App
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This module enables users to add new customer orders quickly and intuitively.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### ✨ Features
+- ➕ Add new orders with multiple products  
+- 🧍‍♀️ Save customer information (name, phone, address)  
+- 📦 Register products with *name*, *quantity*, and *price*  
+- ✏️ Edit or delete existing products  
+- 🕓 Set a pickup time (date and hour)  
+- 💬 Add a side note for each order (displayed in a green box)  
+- 🎨 Minimal and responsive UI built with Tailwind CSS  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### ⚙️ Tech Stack
+- ⚛️ **Next.js / React** – for building the interactive UI  
+- 🧠 **TypeScript** – for static typing and code reliability  
+- 🎨 **Tailwind CSS** – for modern and maintainable styling  
+- 🔔 **React Hot Toast** – for visual notifications  
+- 📅 **React Datepicker** – for selecting pickup times  
+- 💎 **React Icons** – for visual elements and icons  
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🍪 All Orders App
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This module displays and manages all existing orders.  
+It provides a full overview of customers, products, and order statuses.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### ✨ Features
+- 📋 Display all orders with detailed customer and product information  
+- ✏️ Edit order details or products directly  
+- ➕ Add or remove products dynamically  
+- 💾 Save updates instantly via the integrated API  
+- 👑 Highlight important orders with a glowing crown effect  
+- 🗑️ Delete orders with a single click  
+- 🎨 Clean and fully responsive layout with Tailwind CSS  
 
-## Deploy on Vercel
+### ⚙️ Tech Stack
+- ⚡ **Next.js 14+** (App Router, use client)
+- ⚛️ **React Hooks** – *useState, useEffect*
+- 🎨 **Tailwind CSS**
+- 🔔 **React Hot Toast**
+- 💎 **React Icons**
+- 🌐 **REST API Routes** – for backend communication
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧠 Backend
+
+The backend is fully developed within Next.js using **API Routes** for data management.  
+It handles order storage, updates, and deletion efficiently, keeping the architecture lightweight and extendable.
+
+---
+This project was built to:
+
+Practice full-stack development with Next.js + TypeScript + Tailwind CSS
+
+Implement API routes for managing dynamic data
+
+Design a modern, clean, and responsive UI
+
+Combine both frontend and backend logic in a single app
+---
+👩‍💻 Author
+
+Juliana Horanlli
+
